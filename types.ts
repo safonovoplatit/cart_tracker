@@ -29,3 +29,8 @@ export interface CategoryChartData {
   name: string;
   value: number;
 }
+
+export interface WeeklySummary {
+  week: string;
+  summary: string;
+}

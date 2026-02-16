@@ -19,12 +19,12 @@ const App: React.FC = () => {
       case 'home':
       default:
         return (
-          <div className="flex flex-col items-center justify-center h-[80vh] p-6 text-center space-y-8 animate-in fade-in duration-500">
+          <div className="flex flex-col items-center justify-center h-full p-6 text-center space-y-8 animate-in fade-in duration-500">
             <div className="bg-emerald-100 p-6 rounded-full mb-4">
-               <img src="https://picsum.photos/seed/listoklogo/100/100" alt="Listok Logo" className="w-24 h-24 rounded-full shadow-lg grayscale-0" />
+               <img src="https://picsum.photos/seed/carttrackerlogo/100/100" alt="CartTracker Logo" className="w-24 h-24 rounded-full shadow-lg grayscale-0" />
             </div>
             <div>
-                <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Listok</h1>
+                <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">CartTracker</h1>
                 <p className="text-gray-500 max-w-xs mx-auto">Smart grocery budget tracker. Analyze prices, stay on budget.</p>
             </div>
             
@@ -41,14 +41,18 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans text-gray-900 flex flex-col">
-      {/* Main Content */}
-      <main className="flex-1 w-full max-w-xl mx-auto bg-white shadow-2xl min-h-screen md:min-h-0 md:h-screen md:overflow-hidden flex flex-col relative">
-        {renderContent()}
+    <div className="bg-gray-50 h-screen w-screen overflow-hidden font-sans text-gray-900 flex justify-center">
+      {/* App Shell */}
+      <main className="w-full max-w-xl bg-white shadow-2xl h-full flex flex-col relative overflow-hidden">
         
-        {/* Bottom Navigation (Hidden during active trip for focus) */}
+        {/* Content Area - Scrolls independently */}
+        <div className="flex-1 overflow-hidden relative w-full">
+            {renderContent()}
+        </div>
+        
+        {/* Bottom Navigation */}
         {view !== 'active-trip' && (
-            <nav className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-3 flex justify-around items-center z-50 pb-safe">
+            <nav className="flex-none bg-white border-t border-gray-200 px-6 py-3 flex justify-around items-center z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                 <button 
                     onClick={() => setView('home')}
                     className={`flex flex-col items-center gap-1 transition-colors ${view === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}

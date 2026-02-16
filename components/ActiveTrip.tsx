@@ -149,7 +149,7 @@ export const ActiveTrip: React.FC<ActiveTripProps> = ({ onFinish, onCancel }) =>
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)]">
+    <div className="flex flex-col h-full">
       {/* Header Stats */}
       <div className="bg-white p-4 shadow-sm z-10 sticky top-0">
         <div className="flex justify-between items-baseline mb-2">
@@ -166,7 +166,7 @@ export const ActiveTrip: React.FC<ActiveTripProps> = ({ onFinish, onCancel }) =>
       </div>
 
       {/* List Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-32">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-8">
         {items.length === 0 && (
             <div className="text-center text-gray-400 mt-10">
                 <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />

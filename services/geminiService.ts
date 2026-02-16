@@ -1,4 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import { WeeklySummary } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -19,7 +20,8 @@ export const categorizeItem = async (itemName: string): Promise<string> => {
           type: Type.OBJECT,
           properties: {
             category: { type: Type.STRING }
-          }
+          },
+          required: ["category"]
         }
       }
     });
@@ -78,5 +80,41 @@ export const generateSpendingInsight = async (tripsJSON: string): Promise<string
     return response.text || "Keep tracking your expenses to save more!";
   } catch (error) {
     return "Great job tracking your expenses!";
+  }
+};
+
+/**
+ * Generates a summary of products bought per week.
+ */
+export const generateWeeklySummary = async (weeklyData: Record<string, string[]>): Promise<WeeklySummary[]> => {
+  if (Object.keys(weeklyData).length === 0) return [];
+
+  try {
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: `Analyze these grocery items grouped by week. For each week, write a short summary (max 15 words) describing the main types of products purchased (e.g., 'Mostly fresh produce and dairy', 'Heavy on snacks and drinks'). Data: ${JSON.stringify(weeklyData)}`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              week: { type: Type.STRING },
+              summary: { type: Type.STRING }
+            },
+            required: ["week", "summary"]
+          }
+        }
+      }
+    });
+
+    const text = response.text;
+    if (!text) return [];
+    
+    return JSON.parse(text) as WeeklySummary[];
+  } catch (error) {
+    console.error("Gemini weekly summary generation failed:", error);
+    return [];
   }
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingTrip } from '../types';
 import { getHistory } from '../services/storageService';
-import { ChevronDown, ChevronUp, ShoppingBag, Calendar, DollarSign, Image as ImageIcon } from 'lucide-react';
+import { ShoppingBag, Calendar } from 'lucide-react';
 
 export const History: React.FC = () => {
   const [history, setHistory] = useState<ShoppingTrip[]>([]);
@@ -17,7 +17,7 @@ export const History: React.FC = () => {
 
   if (history.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
+      <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8">
         <ShoppingBag className="w-16 h-16 mb-4 opacity-30" />
         <p className="text-lg">No shopping history yet.</p>
         <p className="text-sm">Start a trip to see records here.</p>
@@ -26,8 +26,8 @@ export const History: React.FC = () => {
   }
 
   return (
-    <div className="p-4 space-y-4 pb-24">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Shopping History</h2>
+    <div className="h-full overflow-y-auto p-4 space-y-4">
+      <h2 className="text-2xl font-bold text-gray-800 mb-2 sticky top-0 bg-white/95 backdrop-blur-sm py-2 z-10 border-b border-transparent transition-all">Shopping History</h2>
       {history.map((trip) => {
         const isExpanded = expandedId === trip.id;
         const dateStr = new Date(trip.date).toLocaleDateString(undefined, { 
@@ -92,6 +92,8 @@ export const History: React.FC = () => {
           </div>
         );
       })}
+      {/* Spacer for bottom ease */}
+      <div className="h-8"></div>
     </div>
   );
 };

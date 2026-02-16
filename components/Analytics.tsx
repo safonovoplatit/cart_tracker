@@ -1,13 +1,18 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { getAllItemsFlat, getHistory } from '../services/storageService';
-import { generateSpendingInsight } from '../services/geminiService';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Sparkles, TrendingUp, Search } from 'lucide-react';
+import { getAllItemsFlat, getHistory, getWeeklyItemData } from '../services/storageService';
+import { generateSpendingInsight, generateWeeklySummary } from '../services/geminiService';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Sparkles, TrendingUp, Search, CalendarClock, AlertCircle } from 'lucide-react';
+import { WeeklySummary } from '../types';
 
 export const Analytics: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [insight, setInsight] = useState<string>('');
   const [loadingInsight, setLoadingInsight] = useState(false);
+  
+  const [weeklySummaries, setWeeklySummaries] = useState<WeeklySummary[]>([]);
+  const [loadingSummaries, setLoadingSummaries] = useState(false);
+  const [summaryError, setSummaryError] = useState(false);
 
   const allItems = useMemo(() => getAllItemsFlat(), []);
   
@@ -46,12 +51,25 @@ export const Analytics: React.FC = () => {
         .then(setInsight)
         .catch(() => setInsight("Could not generate insight."))
         .finally(() => setLoadingInsight(false));
+
+      // Generate Weekly Summary
+      setLoadingSummaries(true);
+      setSummaryError(false);
+      const weeklyData = getWeeklyItemData();
+      generateWeeklySummary(weeklyData)
+        .then(setWeeklySummaries)
+        .catch(err => {
+            console.error(err);
+            setSummaryError(true);
+        })
+        .finally(() => setLoadingSummaries(false));
     }
   }, [allItems.length]);
 
   return (
-    <div className="p-4 space-y-6 pb-24">
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-xl border border-emerald-100 shadow-sm">
+    <div className="h-full overflow-y-auto p-4 space-y-6">
+      {/* AI Insight Card */}
+      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-xl border border-emerald-100 shadow-sm mt-2">
         <h2 className="text-lg font-bold text-emerald-900 flex items-center gap-2 mb-2">
           <Sparkles className="w-5 h-5 text-emerald-600" />
           AI Insight
@@ -63,6 +81,37 @@ export const Analytics: React.FC = () => {
         )}
       </div>
 
+      {/* Weekly Summary List */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 mb-4">
+          <CalendarClock className="w-5 h-5 text-gray-700" />
+          Weekly Product Summary
+        </h2>
+        {loadingSummaries ? (
+          <div className="space-y-3">
+             <div className="h-4 bg-gray-100 rounded w-3/4 animate-pulse"></div>
+             <div className="h-4 bg-gray-100 rounded w-1/2 animate-pulse"></div>
+          </div>
+        ) : summaryError ? (
+           <div className="flex items-center gap-2 text-red-500 text-sm">
+             <AlertCircle className="w-4 h-4" />
+             <p>Unable to generate summary. Try again later.</p>
+           </div>
+        ) : weeklySummaries.length > 0 ? (
+          <div className="space-y-4">
+            {weeklySummaries.map((item, index) => (
+              <div key={index} className="border-l-4 border-emerald-400 pl-3">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">Week of {item.week}</h3>
+                <p className="text-sm text-gray-800 mt-1">{item.summary}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400 italic">No weekly data available yet.</p>
+        )}
+      </div>
+
+      {/* Price Tracker Chart */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <TrendingUp className="w-6 h-6 text-gray-700" />
@@ -99,20 +148,4 @@ export const Analytics: React.FC = () => {
                     dataKey="price" 
                     stroke="#10b981" 
                     strokeWidth={3} 
-                    dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} 
-                    activeDot={{ r: 6 }} 
-                />
-              </LineChart>
-            </ResponsiveContainer>
-            <p className="text-center text-xs text-gray-400 mt-2">Price history across all stores</p>
-          </div>
-        ) : (
-            <div className="h-64 flex flex-col items-center justify-center text-gray-400 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                <Search className="w-8 h-8 mb-2 opacity-50" />
-                <p>Select a product to see price history</p>
-            </div>
-        )}
-      </div>
-    </div>
-  );
-};
+                    dot={{ r: 4, fill: '#10b981', strokeWidth: 2,

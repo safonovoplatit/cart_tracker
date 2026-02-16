@@ -1,6 +1,6 @@
 import { ShoppingTrip } from "../types";
 
-const STORAGE_KEY = "listok_history_v1";
+const STORAGE_KEY = "carttracker_history_v1";
 
 export const saveTrip = (trip: ShoppingTrip) => {
   const existing = getHistory();
@@ -29,4 +29,28 @@ export const getAllItemsFlat = (): { name: string; price: number; date: number; 
   });
   
   return allItems.sort((a, b) => a.date - b.date);
+};
+
+export const getWeeklyItemData = (): Record<string, string[]> => {
+  const history = getHistory();
+  const weeks: Record<string, string[]> = {};
+
+  // Sort history by date descending
+  const sortedHistory = [...history].sort((a, b) => b.date - a.date);
+
+  sortedHistory.forEach(trip => {
+    const date = new Date(trip.date);
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - date.getDay()); // Adjust to Sunday
+    const weekKey = startOfWeek.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+    if (!weeks[weekKey]) {
+        weeks[weekKey] = [];
+    }
+    trip.items.forEach(item => {
+        weeks[weekKey].push(item.name);
+    });
+  });
+  
+  return weeks;
 };
