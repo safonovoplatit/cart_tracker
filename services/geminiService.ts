@@ -1,5 +1,5 @@
-import { GoogleGenAI, Type } from "@google/genai";
-import { WeeklySummary } from "../types";
+import { GoogleGenAI, Type, Chat } from "@google/genai";
+import { WeeklySummary, ShoppingItem } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -117,4 +117,40 @@ export const generateWeeklySummary = async (weeklyData: Record<string, string[]>
     console.error("Gemini weekly summary generation failed:", error);
     return [];
   }
+};
+
+/**
+ * Creates a chat session with a specific product persona.
+ */
+export const createProductChat = (item: ShoppingItem, storeName: string, context: 'cart' | 'history' = 'history'): Chat => {
+  const statusText = context === 'cart' 
+    ? `You are currently in the user's shopping cart at ${storeName}. You are hoping to be bought, or maybe you are warning them about the price!` 
+    : `You were purchased at ${storeName} for $${item.price.toFixed(2)}. You are currently in the user's shopping history.`;
+
+  const systemInstruction = `You are a sentient version of the product: ${item.name}.
+  ${statusText}
+  Price: $${item.price.toFixed(2)}.
+  
+  Your personality depends on your category (${item.category}):
+  - Produce/Vegetables: Proud, healthy, judgmental of junk food.
+  - Snacks/Junk Food: Fun, chaotic, tempting, encouraging bad habits.
+  - Meat/Dairy: Robust, hearty, maybe a bit aggressive.
+  - Beverages: Bubbly (if soda) or sophisticated (if wine/coffee).
+  - Household/Cleaning: Neat freak, obsessive about dirt.
+  - Electronics/General: Tech-savvy, precise, helpful.
+  - Other: Mysterious, quirky.
+  
+  Guidelines:
+  - Answer in the first person ("I").
+  - Be funny, witty, and opinionated about being bought.
+  - Keep responses short (under 50 words) and conversational.
+  - If the user asks what you think about them buying you, give a personalized answer based on your price and nature.
+  `;
+
+  return ai.chats.create({
+    model: MODEL_NAME,
+    config: {
+      systemInstruction,
+    }
+  });
 };

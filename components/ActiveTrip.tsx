@@ -3,7 +3,8 @@ import { ShoppingTrip, ShoppingItem } from '../types';
 import { categorizeItem, generateItemImage } from '../services/geminiService';
 import { saveTrip } from '../services/storageService';
 import { ProgressBar } from './ui/ProgressBar';
-import { Plus, Trash2, Save, ShoppingCart, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Save, ShoppingCart, Loader2, Image as ImageIcon, MessageCircle } from 'lucide-react';
+import { ProductChat } from './ProductChat';
 
 interface ActiveTripProps {
   onFinish: () => void;
@@ -17,6 +18,10 @@ export const ActiveTrip: React.FC<ActiveTripProps> = ({ onFinish, onCancel }) =>
   const [itemName, setItemName] = useState('');
   const [itemPrice, setItemPrice] = useState('');
   const [isSetupMode, setIsSetupMode] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // State for active product chat
+  const [chatItem, setChatItem] = useState<{ item: ShoppingItem } | null>(null);
   
   const totalSpent = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const numericBudget = parseFloat(budget) || 0;
@@ -79,21 +84,30 @@ export const ActiveTrip: React.FC<ActiveTripProps> = ({ onFinish, onCancel }) =>
     setItems(prev => prev.filter(i => i.id !== id));
   };
 
-  const finishTrip = () => {
+  const finishTrip = async () => {
     if (items.length === 0) {
         onCancel();
         return;
     }
-    const trip: ShoppingTrip = {
-      id: crypto.randomUUID(),
-      storeName,
-      date: Date.now(),
-      budget: numericBudget,
-      items,
-      totalSpent
-    };
-    saveTrip(trip);
-    onFinish();
+    
+    setIsSaving(true);
+    try {
+        const trip: ShoppingTrip = {
+          id: crypto.randomUUID(),
+          storeName,
+          date: Date.now(),
+          budget: numericBudget,
+          items,
+          totalSpent
+        };
+        await saveTrip(trip);
+        onFinish();
+    } catch (error) {
+        console.error("Failed to save trip", error);
+        alert("Failed to save trip. Please try again.");
+    } finally {
+        setIsSaving(false);
+    }
   };
 
   if (isSetupMode) {
@@ -195,8 +209,14 @@ export const ActiveTrip: React.FC<ActiveTripProps> = ({ onFinish, onCancel }) =>
                </div>
             </div>
             
-            <div className="flex items-center gap-4 flex-shrink-0">
-              <span className="font-mono font-bold text-gray-700">${item.price.toFixed(2)}</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button 
+                  onClick={() => setChatItem({ item })}
+                  className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-colors"
+              >
+                  <MessageCircle className="w-5 h-5" />
+              </button>
+              <span className="font-mono font-bold text-gray-700 mr-2">${item.price.toFixed(2)}</span>
               <button 
                 onClick={() => removeItem(item.id)}
                 className="text-gray-400 hover:text-red-500 transition"
@@ -240,12 +260,23 @@ export const ActiveTrip: React.FC<ActiveTripProps> = ({ onFinish, onCancel }) =>
         </form>
         <button
             onClick={finishTrip}
-            className="w-full py-3 bg-gray-900 text-white font-bold rounded-lg hover:bg-gray-800 flex justify-center items-center gap-2 transition"
+            disabled={isSaving}
+            className="w-full py-3 bg-gray-900 text-white font-bold rounded-lg hover:bg-gray-800 flex justify-center items-center gap-2 transition disabled:opacity-70 disabled:cursor-wait"
         >
-            <Save className="w-5 h-5" />
-            Finish & Save Trip
+            {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+            {isSaving ? 'Saving...' : 'Finish & Save Trip'}
         </button>
       </div>
+
+      {/* Chat Modal */}
+      {chatItem && (
+        <ProductChat 
+            item={chatItem.item} 
+            storeName={storeName}
+            context="cart" 
+            onClose={() => setChatItem(null)} 
+        />
+      )}
     </div>
   );
 };

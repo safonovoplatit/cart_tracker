@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { getAllItemsFlat, getHistory, getWeeklyItemData } from '../services/storageService';
 import { generateSpendingInsight, generateWeeklySummary } from '../services/geminiService';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Sparkles, TrendingUp, Search, CalendarClock, AlertCircle } from 'lucide-react';
+import { Sparkles, TrendingUp, Search, CalendarClock, AlertCircle, Loader2 } from 'lucide-react';
 import { WeeklySummary } from '../types';
 
 export const Analytics: React.FC = () => {
@@ -14,7 +14,23 @@ export const Analytics: React.FC = () => {
   const [loadingSummaries, setLoadingSummaries] = useState(false);
   const [summaryError, setSummaryError] = useState(false);
 
-  const allItems = useMemo(() => getAllItemsFlat(), []);
+  const [allItems, setAllItems] = useState<{ name: string; price: number; date: number; store: string }[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+
+  // Fetch initial data from DB
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const items = await getAllItemsFlat();
+            setAllItems(items);
+        } catch (error) {
+            console.error("Failed to load analytics data", error);
+        } finally {
+            setLoadingData(false);
+        }
+    };
+    fetchData();
+  }, []);
   
   // Get unique product names for the dropdown
   const uniqueProducts = useMemo(() => {
@@ -36,35 +52,49 @@ export const Analytics: React.FC = () => {
       .sort((a, b) => a.timestamp - b.timestamp);
   }, [allItems, selectedProduct]);
 
+  // Generate Insights and Summaries when data is ready
   useEffect(() => {
     if (allItems.length > 0) {
       setLoadingInsight(true);
-      const history = getHistory().slice(0, 5); // Analyze last 5 trips
-      const simplifiedHistory = history.map(h => ({
-        date: new Date(h.date).toLocaleDateString(),
-        store: h.storeName,
-        total: h.totalSpent,
-        budget: h.budget
-      }));
       
-      generateSpendingInsight(JSON.stringify(simplifiedHistory))
-        .then(setInsight)
-        .catch(() => setInsight("Could not generate insight."))
-        .finally(() => setLoadingInsight(false));
+      // We need history for insight, so fetch it
+      getHistory().then(history => {
+          const simplifiedHistory = history.slice(0, 5).map(h => ({
+            date: new Date(h.date).toLocaleDateString(),
+            store: h.storeName,
+            total: h.totalSpent,
+            budget: h.budget
+          }));
+          
+          generateSpendingInsight(JSON.stringify(simplifiedHistory))
+            .then(setInsight)
+            .catch(() => setInsight("Could not generate insight."))
+            .finally(() => setLoadingInsight(false));
+      });
 
       // Generate Weekly Summary
       setLoadingSummaries(true);
       setSummaryError(false);
-      const weeklyData = getWeeklyItemData();
-      generateWeeklySummary(weeklyData)
-        .then(setWeeklySummaries)
-        .catch(err => {
-            console.error(err);
-            setSummaryError(true);
-        })
-        .finally(() => setLoadingSummaries(false));
+      
+      getWeeklyItemData().then(weeklyData => {
+           generateWeeklySummary(weeklyData)
+            .then(setWeeklySummaries)
+            .catch(err => {
+                console.error(err);
+                setSummaryError(true);
+            })
+            .finally(() => setLoadingSummaries(false));
+      });
     }
   }, [allItems.length]);
+
+  if (loadingData) {
+      return (
+          <div className="flex flex-col items-center justify-center h-full text-emerald-600">
+              <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+      );
+  }
 
   return (
     <div className="h-full overflow-y-auto p-4 space-y-6">
@@ -148,4 +178,21 @@ export const Analytics: React.FC = () => {
                     dataKey="price" 
                     stroke="#10b981" 
                     strokeWidth={3} 
-                    dot={{ r: 4, fill: '#10b981', strokeWidth: 2,
+                    dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} 
+                    activeDot={{ r: 6 }} 
+                />
+              </LineChart>
+            </ResponsiveContainer>
+            <p className="text-center text-xs text-gray-400 mt-2">Price history across all stores</p>
+          </div>
+        ) : (
+            <div className="h-64 flex flex-col items-center justify-center text-gray-400 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                <Search className="w-8 h-8 mb-2 opacity-50" />
+                <p>Select a product to see price history</p>
+            </div>
+        )}
+      </div>
+      <div className="h-8"></div>
+    </div>
+  );
+};
