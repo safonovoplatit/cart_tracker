@@ -112,99 +112,106 @@ export const ActiveTrip: React.FC<ActiveTripProps> = ({ onFinish, onCancel }) =>
 
   if (isSetupMode) {
     return (
-      <div className="max-w-md mx-auto p-6 bg-white rounded-2xl shadow-xl mt-10">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-          <ShoppingCart className="w-6 h-6 text-emerald-600" />
-          Start Shopping
-        </h2>
-        <form onSubmit={handleStartTrip} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
-            <input
-              required
-              type="text"
-              value={storeName}
-              onChange={(e) => setStoreName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
-              placeholder="e.g. Whole Foods"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Budget</label>
-            <input
-              required
-              type="number"
-              min="1"
-              step="0.01"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
-              placeholder="0.00"
-            />
-          </div>
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="flex-1 py-3 text-gray-600 font-semibold rounded-lg hover:bg-gray-100 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 shadow-lg transition"
-            >
-              Start Trip
-            </button>
-          </div>
-        </form>
+      <div className="h-full flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md p-8 bg-white/40 backdrop-blur-xl border border-white/50 rounded-3xl shadow-xl">
+            <h2 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+            <ShoppingCart className="w-8 h-8 text-emerald-600" />
+            Start Shopping
+            </h2>
+            <form onSubmit={handleStartTrip} className="space-y-6">
+            <div>
+                <label className="block text-sm font-bold text-slate-600 mb-2 ml-1">Store Name</label>
+                <input
+                required
+                type="text"
+                value={storeName}
+                onChange={(e) => setStoreName(e.target.value)}
+                className="w-full px-5 py-4 bg-white/50 backdrop-blur-md border border-white/40 rounded-2xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition shadow-inner text-slate-800 font-medium placeholder:text-slate-400"
+                placeholder="e.g. Whole Foods"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-bold text-slate-600 mb-2 ml-1">Budget</label>
+                <input
+                required
+                type="number"
+                min="1"
+                step="0.01"
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+                className="w-full px-5 py-4 bg-white/50 backdrop-blur-md border border-white/40 rounded-2xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition shadow-inner text-slate-800 font-medium placeholder:text-slate-400"
+                placeholder="0.00"
+                />
+            </div>
+            <div className="flex gap-4 pt-4">
+                <button
+                type="button"
+                onClick={onCancel}
+                className="flex-1 py-4 text-slate-600 font-bold rounded-2xl hover:bg-white/40 transition"
+                >
+                Cancel
+                </button>
+                <button
+                type="submit"
+                className="flex-1 py-4 bg-emerald-500/90 hover:bg-emerald-500 backdrop-blur-md text-white font-bold rounded-2xl shadow-lg hover:shadow-emerald-500/40 transition-all transform hover:-translate-y-0.5"
+                >
+                Let's Go
+                </button>
+            </div>
+            </form>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header Stats */}
-      <div className="bg-white p-4 shadow-sm z-10 sticky top-0">
-        <div className="flex justify-between items-baseline mb-2">
-          <h2 className="font-bold text-gray-800 truncate max-w-[50%]">{storeName}</h2>
-          <div className={`text-xl font-mono font-bold ${remaining < 0 ? 'text-red-500 animate-pulse' : 'text-emerald-600'}`}>
+    <div className="flex flex-col h-full relative">
+      {/* Header Stats (Glass) */}
+      <div className="bg-white/30 backdrop-blur-xl border-b border-white/20 p-6 z-20 sticky top-0 shadow-sm">
+        <div className="flex justify-between items-baseline mb-3">
+          <h2 className="text-2xl font-black text-slate-800 truncate max-w-[50%] tracking-tight">{storeName}</h2>
+          <div className={`text-xl font-mono font-bold drop-shadow-sm ${remaining < 0 ? 'text-red-600 animate-pulse' : 'text-emerald-700'}`}>
             {remaining < 0 ? '-' : ''}${Math.abs(remaining).toFixed(2)} left
           </div>
         </div>
         <ProgressBar current={totalSpent} max={numericBudget} />
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <div className="flex justify-between text-xs font-semibold text-slate-500 mt-2 px-1">
             <span>Spent: ${totalSpent.toFixed(2)}</span>
             <span>Budget: ${numericBudget.toFixed(2)}</span>
         </div>
       </div>
 
       {/* List Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-8">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-32">
         {items.length === 0 && (
-            <div className="text-center text-gray-400 mt-10">
-                <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>Cart is empty. Add items below.</p>
+            <div className="text-center text-slate-400 mt-20">
+                <div className="bg-white/20 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md border border-white/30">
+                    <ShoppingCart className="w-10 h-10 opacity-50" />
+                </div>
+                <p className="font-medium text-lg">Cart is empty.</p>
+                <p className="text-sm opacity-70">Add items below.</p>
             </div>
         )}
         {items.map((item) => (
-          <div key={item.id} className="bg-white p-3 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div key={item.id} className="group bg-white/40 backdrop-blur-md p-3 rounded-2xl border border-white/50 flex justify-between items-center animate-in fade-in slide-in-from-bottom-4 duration-500 hover:bg-white/60 transition-all shadow-[0_4px_16px_0_rgba(31,38,135,0.05)]">
             <div className="flex items-center gap-3 overflow-hidden">
                {/* Image Thumbnail */}
-               <div className="w-12 h-12 rounded-md bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100">
+               <div className="w-14 h-14 rounded-xl bg-white/60 flex items-center justify-center overflow-hidden flex-shrink-0 border border-white/60 shadow-inner">
                   {item.imageUrl ? (
-                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover mix-blend-multiply" />
                   ) : (
                      item.category === 'Loading...' ? 
                      <Loader2 className="w-5 h-5 text-emerald-500 animate-spin" /> :
-                     <ImageIcon className="w-5 h-5 text-gray-300" />
+                     <ImageIcon className="w-5 h-5 text-slate-400" />
                   )}
                </div>
                
                <div className="min-w-0">
-                 <div className="font-medium text-gray-800 truncate">{item.name}</div>
-                 <div className="text-xs text-gray-500 flex items-center gap-1">
-                   {item.category === 'Loading...' ? <span className="animate-pulse">Categorizing...</span> : item.category}
+                 <div className="font-bold text-slate-800 text-lg truncate leading-tight">{item.name}</div>
+                 <div className="text-xs font-medium text-slate-500 flex items-center gap-1 mt-0.5">
+                   {item.category === 'Loading...' ? <span className="animate-pulse text-emerald-600">Categorizing...</span> : 
+                    <span className="bg-white/50 px-2 py-0.5 rounded-md border border-white/40">{item.category}</span>
+                   }
                  </div>
                </div>
             </div>
@@ -212,14 +219,14 @@ export const ActiveTrip: React.FC<ActiveTripProps> = ({ onFinish, onCancel }) =>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button 
                   onClick={() => setChatItem({ item })}
-                  className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-colors"
+                  className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-100/50 rounded-full transition-colors"
               >
                   <MessageCircle className="w-5 h-5" />
               </button>
-              <span className="font-mono font-bold text-gray-700 mr-2">${item.price.toFixed(2)}</span>
+              <span className="font-mono font-bold text-slate-700 text-lg mr-1">${item.price.toFixed(2)}</span>
               <button 
                 onClick={() => removeItem(item.id)}
-                className="text-gray-400 hover:text-red-500 transition"
+                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
@@ -228,44 +235,46 @@ export const ActiveTrip: React.FC<ActiveTripProps> = ({ onFinish, onCancel }) =>
         ))}
       </div>
 
-      {/* Input Area (Sticky Bottom) */}
-      <div className="bg-white border-t border-gray-200 p-4 sticky bottom-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-        <form onSubmit={addItem} className="flex gap-2 mb-3">
-            <div className="flex-grow flex gap-2">
-                <input
-                    ref={nameInputRef}
-                    type="text"
-                    placeholder="Item name"
-                    value={itemName}
-                    onChange={(e) => setItemName(e.target.value)}
-                    className="w-2/3 px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                />
-                <input
-                    ref={priceInputRef}
-                    type="number"
-                    step="0.01"
-                    placeholder="Price"
-                    value={itemPrice}
-                    onChange={(e) => setItemPrice(e.target.value)}
-                    className="w-1/3 px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                />
-            </div>
-            <button 
-                type="submit"
-                disabled={!itemName || !itemPrice}
-                className="bg-emerald-600 text-white p-3 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-md"
+      {/* Input Area (Floating Glass Bar) */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 z-30 bg-gradient-to-t from-indigo-100/90 via-indigo-100/50 to-transparent pb-safe">
+        <div className="bg-white/70 backdrop-blur-2xl border border-white/60 p-2 rounded-[2rem] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] ring-1 ring-white/50">
+            <form onSubmit={addItem} className="flex gap-2 mb-2">
+                <div className="flex-grow flex gap-2">
+                    <input
+                        ref={nameInputRef}
+                        type="text"
+                        placeholder="Item"
+                        value={itemName}
+                        onChange={(e) => setItemName(e.target.value)}
+                        className="w-[60%] px-4 py-3 bg-white/50 border-0 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 placeholder:text-slate-400 font-medium"
+                    />
+                    <input
+                        ref={priceInputRef}
+                        type="number"
+                        step="0.01"
+                        placeholder="$$"
+                        value={itemPrice}
+                        onChange={(e) => setItemPrice(e.target.value)}
+                        className="w-[40%] px-4 py-3 bg-white/50 border-0 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 placeholder:text-slate-400 font-medium"
+                    />
+                </div>
+                <button 
+                    type="submit"
+                    disabled={!itemName || !itemPrice}
+                    className="aspect-square h-full bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg flex items-center justify-center"
+                >
+                    <Plus className="w-6 h-6" />
+                </button>
+            </form>
+            <button
+                onClick={finishTrip}
+                disabled={isSaving}
+                className="w-full py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 flex justify-center items-center gap-2 transition disabled:opacity-70 disabled:cursor-wait shadow-lg"
             >
-                <Plus className="w-6 h-6" />
+                {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                {isSaving ? 'Saving...' : 'Finish Trip'}
             </button>
-        </form>
-        <button
-            onClick={finishTrip}
-            disabled={isSaving}
-            className="w-full py-3 bg-gray-900 text-white font-bold rounded-lg hover:bg-gray-800 flex justify-center items-center gap-2 transition disabled:opacity-70 disabled:cursor-wait"
-        >
-            {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-            {isSaving ? 'Saving...' : 'Finish & Save Trip'}
-        </button>
+        </div>
       </div>
 
       {/* Chat Modal */}

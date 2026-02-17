@@ -91,36 +91,42 @@ export const Analytics: React.FC = () => {
   if (loadingData) {
       return (
           <div className="flex flex-col items-center justify-center h-full text-emerald-600">
-              <Loader2 className="w-8 h-8 animate-spin" />
+              <Loader2 className="w-10 h-10 animate-spin opacity-80" />
           </div>
       );
   }
 
   return (
     <div className="h-full overflow-y-auto p-4 space-y-6">
-      {/* AI Insight Card */}
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-xl border border-emerald-100 shadow-sm mt-2">
-        <h2 className="text-lg font-bold text-emerald-900 flex items-center gap-2 mb-2">
+      
+      {/* AI Insight Card (Special Glass) */}
+      <div className="bg-gradient-to-br from-emerald-100/40 to-teal-100/40 backdrop-blur-md p-6 rounded-3xl border border-white/50 shadow-lg relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+             <Sparkles className="w-20 h-20 text-emerald-600" />
+        </div>
+        <h2 className="text-lg font-black text-emerald-900 flex items-center gap-2 mb-3">
           <Sparkles className="w-5 h-5 text-emerald-600" />
           AI Insight
         </h2>
         {loadingInsight ? (
-           <p className="text-emerald-700 animate-pulse text-sm">Analyzing your spending habits...</p>
+           <div className="flex items-center gap-2 text-emerald-700 animate-pulse text-sm font-medium">
+             <Loader2 className="w-4 h-4 animate-spin" /> Analyzing your spending habits...
+           </div>
         ) : (
-           <p className="text-emerald-800 text-sm italic">"{insight}"</p>
+           <p className="text-emerald-900 text-lg font-medium leading-relaxed italic relative z-10">"{insight}"</p>
         )}
       </div>
 
       {/* Weekly Summary List */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 mb-4">
-          <CalendarClock className="w-5 h-5 text-gray-700" />
+      <div className="bg-white/40 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-white/50">
+        <h2 className="text-lg font-black text-slate-800 flex items-center gap-2 mb-4">
+          <CalendarClock className="w-5 h-5 text-slate-600" />
           Weekly Product Summary
         </h2>
         {loadingSummaries ? (
           <div className="space-y-3">
-             <div className="h-4 bg-gray-100 rounded w-3/4 animate-pulse"></div>
-             <div className="h-4 bg-gray-100 rounded w-1/2 animate-pulse"></div>
+             <div className="h-4 bg-white/50 rounded w-3/4 animate-pulse"></div>
+             <div className="h-4 bg-white/50 rounded w-1/2 animate-pulse"></div>
           </div>
         ) : summaryError ? (
            <div className="flex items-center gap-2 text-red-500 text-sm">
@@ -130,28 +136,28 @@ export const Analytics: React.FC = () => {
         ) : weeklySummaries.length > 0 ? (
           <div className="space-y-4">
             {weeklySummaries.map((item, index) => (
-              <div key={index} className="border-l-4 border-emerald-400 pl-3">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">Week of {item.week}</h3>
-                <p className="text-sm text-gray-800 mt-1">{item.summary}</p>
+              <div key={index} className="border-l-4 border-emerald-400 pl-4 py-1">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">{item.week}</h3>
+                <p className="text-sm text-slate-800 font-medium mt-1 leading-snug">{item.summary}</p>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-400 italic">No weekly data available yet.</p>
+          <p className="text-sm text-slate-400 italic">No weekly data available yet.</p>
         )}
       </div>
 
       {/* Price Tracker Chart */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-gray-700" />
+      <div className="bg-white/40 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-white/50">
+        <h2 className="text-xl font-black text-slate-800 mb-4 flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-slate-600" />
             Price Tracker
         </h2>
         
         <div className="relative mb-6">
-            <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <select
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none appearance-none bg-white"
+                className="w-full pl-12 pr-4 py-3 border border-white/40 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none appearance-none bg-white/50 font-medium text-slate-700 shadow-inner"
                 value={selectedProduct}
                 onChange={(e) => setSelectedProduct(e.target.value)}
             >
@@ -166,33 +172,33 @@ export const Analytics: React.FC = () => {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="date" tick={{fontSize: 12}} tickLine={false} axisLine={false} />
-                <YAxis domain={['auto', 'auto']} tick={{fontSize: 12}} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.5)" />
+                <XAxis dataKey="date" tick={{fontSize: 12, fill: '#64748b'}} tickLine={false} axisLine={false} />
+                <YAxis domain={['auto', 'auto']} tick={{fontSize: 12, fill: '#64748b'}} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
                 <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    contentStyle={{ borderRadius: '12px', border: '1px solid rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(4px)', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}
                     formatter={(value: number) => [`$${value.toFixed(2)}`, 'Price']}
                 />
                 <Line 
                     type="monotone" 
                     dataKey="price" 
                     stroke="#10b981" 
-                    strokeWidth={3} 
-                    dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} 
-                    activeDot={{ r: 6 }} 
+                    strokeWidth={4} 
+                    dot={{ r: 5, fill: '#10b981', strokeWidth: 3, stroke: '#fff' }} 
+                    activeDot={{ r: 8 }} 
                 />
               </LineChart>
             </ResponsiveContainer>
-            <p className="text-center text-xs text-gray-400 mt-2">Price history across all stores</p>
+            <p className="text-center text-xs text-slate-400 mt-2 font-medium">Price history across all stores</p>
           </div>
         ) : (
-            <div className="h-64 flex flex-col items-center justify-center text-gray-400 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                <Search className="w-8 h-8 mb-2 opacity-50" />
-                <p>Select a product to see price history</p>
+            <div className="h-64 flex flex-col items-center justify-center text-slate-400 bg-white/20 rounded-2xl border-2 border-dashed border-white/40">
+                <Search className="w-10 h-10 mb-2 opacity-50" />
+                <p className="font-medium">Select a product to see price history</p>
             </div>
         )}
       </div>
-      <div className="h-8"></div>
+      <div className="h-24"></div>
     </div>
   );
 };
